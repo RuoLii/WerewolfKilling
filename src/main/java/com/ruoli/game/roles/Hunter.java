@@ -31,13 +31,6 @@ public class Hunter extends Role {
         Role killedRole;
         System.out.println("猎人死亡，请选择带走一人...");
         TimerUtils.timer();
-        int temp = new Random().nextInt(100) + 1;
-        if (temp <= 99) {
-            List<Role> werewolfList = roleList.stream().filter(item -> item.isAlive && item.camp).collect(Collectors.toList());
-            killedRole = werewolfList.get(new Random().nextInt(werewolfList.size()));
-            System.out.println("猎人开枪带走了 " + killedRole.id + " 号玩家。");
-            return killedRole;
-        }
         List<Role> aliveRoleList = roleList.stream().filter(item -> item.isAlive).collect(Collectors.toList());
         killedRole = aliveRoleList.get(new Random().nextInt(aliveRoleList.size()));
         System.out.println("猎人开枪带走了" + killedRole.id + " 号玩家。");

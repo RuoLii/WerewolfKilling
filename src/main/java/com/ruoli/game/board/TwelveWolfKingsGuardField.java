@@ -20,7 +20,18 @@ public class TwelveWolfKingsGuardField {
     private static final List<String> operationList = new ArrayList<>();
 
     public TwelveWolfKingsGuardField() throws InterruptedException {
-        //  ====  分配角色及号码牌  ====
+        //  ====  分配身份  ====
+        roleReady();
+        //  ====  开始游戏  ====
+        gameStart();
+        //  ====  游戏结算  ====
+        gameSettlement();
+    }
+
+    /**
+     * 分配角色及号码牌
+     */
+    private static void roleReady() {
         //  4平民
         for (int i = 0; i < 4; i++) roleList.add(new Civilian(0));
         //  1预言家
@@ -41,21 +52,20 @@ public class TwelveWolfKingsGuardField {
         for (Role role : roleList) {
             role.id = number++;
         }
-
-        Role userRole = roleList.get(new Random().nextInt(11) + 1);
-
-        //  为当前用户随机抽取一个身份
-        System.out.println("\n----------------------------------\n\n你的身份是：" + userRole.name + "，号码为：" + userRole.id + "\n\n----------------------------------\n");
-        TimerUtils.timer();
         System.out.println("**********************************\niwei：“游戏即将开始，请各位玩家做好准备！！”\n**********************************");
+    }
 
-        //  ====  开始游戏逻辑(夜晚 ——> 白天 为一次循环)  ====
+    /**
+     * 开始游戏
+     * (夜晚 ——> 白天 为一次循环)
+     */
+    private static void gameStart() throws InterruptedException {
         int day = 0; //  进行了几晚
         List<Role> deathList = new ArrayList<>();
         Role protectedRole = null;
         Boolean isWitchSave = false;
         Role poisonedRole = null;
-        while (gameState() == 0) {
+        while (true) {
             TimerUtils.timer();
             day++;
             deathList.clear();
@@ -105,7 +115,7 @@ public class TwelveWolfKingsGuardField {
 
             //  守卫
             Guard.start();
-            //  守卫守护逻辑
+            //  守卫守护
             Guard guardPlayer = null;
             if (!roleList.stream().filter(item -> Objects.equals(item.name, "守卫")).collect(Collectors.toList()).isEmpty()) {
                 guardPlayer = (Guard) roleList.stream().filter(item -> Objects.equals(item.name, "守卫")).collect(Collectors.toList()).get(0);
@@ -140,23 +150,46 @@ public class TwelveWolfKingsGuardField {
                 deathList.forEach(item -> {
                     operationList.add("第" + finalDay + "天白天，" + item.id + " 号玩家（" + item.name + "）死亡。");
                     System.out.println(item.id + "号 死亡");
+                    item.dead();
+                });
+                TimerUtils.timer();
+                deathList.stream().filter(item -> (item.name == "猎人" || item.name == "狼王") && !item.isAlive).collect(Collectors.toList()).forEach(item -> {
+                    Role doubleKilledRole = null;
                     try {
-                        item.dead(roleList);
+                        doubleKilledRole = item.deadKill(roleList);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
+                    operationList.add("第" + finalDay + "天白天，" + item.id + " 号玩家（" + item.name + "）发动技能杀死 " + doubleKilledRole.id + " 号玩家（" + doubleKilledRole.name + "）。");
+                    System.out.println(doubleKilledRole.id + "号 死亡");
+                    doubleKilledRole.dead();
+                    //  带走人之后要进行判断
+                    if (gameState() != 0) return;
                 });
-
             }
             System.out.println("\n==================================");
 
-            /**
-             * 白天开始发言
+            /*
+             * 白天开始发言（随机选一个人开始顺序发言）
              */
+            List<Role> sayList = roleList.stream().filter(item -> item.isAlive).collect(Collectors.toList());
+            int startIndex = new Random().nextInt(sayList.size());
+            List<Role> sortedCircularList = new ArrayList<>();
+            for (int i = 0; i < sayList.size(); i++) {
+                sortedCircularList.add(sayList.get((startIndex + i) % sayList.size()));
+            }
+            sortedCircularList.forEach(item -> {
+                item.say();
+                try {
+                    TimerUtils.timer();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             System.out.println("发言完毕，开始投票...");
             TimerUtils.timer();
 
-            /**
+            /*
              * 投票
              */
             int temp = new Random().nextInt(100) + 1;
@@ -167,40 +200,32 @@ public class TwelveWolfKingsGuardField {
             } else {
                 voteList = roleList.stream().filter(item -> item.isAlive && !item.camp).collect(Collectors.toList());
             }
-            votedRole = voteList.get(new Random().nextInt(voteList.toArray().length));
-            votedRole.dead(roleList);
+            votedRole = voteList.get(new Random().nextInt(voteList.size()));
+            votedRole.dead();
             System.out.print(votedRole.id + "号玩家被投票出局，");
             operationList.add("第" + day + "天白天，" + votedRole.id + " 号玩家（" + votedRole.name + "）被投票出局。");
-
-            /**
-             * 判断游戏是否结束
-             */
-            if (gameState() == 1) {
-                System.out.println("游戏结束，狼人获胜。");
-                break;
-            } else if (gameState() == 2) {
-                System.out.println("游戏结束，好人获胜。");
-                break;
-            } else {
-                System.out.println("游戏继续。");
+            if (votedRole.name == "猎人" || votedRole.name == "狼王") {
+                Role doubleKilledRole = null;
+                try {
+                    doubleKilledRole = votedRole.deadKill(roleList);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                operationList.add("第" + day + "天白天，" + votedRole.id + " 号玩家（" + votedRole.name + "）发动技能杀死 " + doubleKilledRole.id + " 号玩家（" + doubleKilledRole.name + "）。");
+                System.out.println(doubleKilledRole.id + "号 死亡");
+                doubleKilledRole.dead();
+                //  带走人之后要进行判断
+                if (gameState() != 0) return;
             }
-            TimerUtils.timer();
-        }
 
-        System.out.print("输入 \"0\" 查看战绩：");
-        Scanner scanner = new Scanner(System.in);
-        int op = scanner.nextInt();
-        if (op == 0) {
-            System.out.println("\n\n==================================\n");
-            roleList.forEach(item -> System.out.println(item.id + "号——" + item.name));
-            System.out.println("\n\n==================================\n");
-            operationList.forEach(System.out::println);
-            System.out.println("\n==================================\n");
+            //  ====  判断游戏是否结束  ====
+            if (gameState() != 0) return;
         }
     }
 
     /**
-     * 判断游戏是否结束
+     * 游戏状态
+     *
      * @return 0 代表未结束，1代表狼人阵营胜利，2代表好人阵营胜利
      */
     private static Integer gameState() {
@@ -208,14 +233,35 @@ public class TwelveWolfKingsGuardField {
         List<Role> List2 = roleList.stream().filter(item -> !item.camp && item.isAlive).collect(Collectors.toList());
         List<Role> civilianList = roleList.stream().filter(item -> Objects.equals(item.name, "平民") && item.isAlive).collect(Collectors.toList());
         if (List1.isEmpty()) {
+            System.out.println("游戏结束，好人获胜。");
             return 2; //  狼人阵营全死，好人胜利
         } else if (List2.isEmpty()) {
+            System.out.println("游戏结束，狼人获胜。");
             return 1; //  好人阵营全死，狼人胜利
         } else if (civilianList.isEmpty()) {
+            System.out.println("游戏结束，狼人获胜。");
             return 1; //  平民全死，狼人胜利
         } else if (List1.toArray().length >= List2.toArray().length) {
+            System.out.println("游戏结束，狼人获胜。");
             return 1; //  狼人阵营人数等于或超过好人阵营人数，狼人胜利
         }
+        System.out.println("游戏继续。");
         return 0; //  游戏未结束
+    }
+
+    /**
+     * 结算游戏
+     */
+    private static void gameSettlement() {
+        System.out.print("==================================\n输入 \"0\" 查看战绩：");
+        Scanner scanner = new Scanner(System.in);
+        int op = scanner.nextInt();
+        if (op == 0) {
+            System.out.println("==================================");
+            roleList.forEach(item -> System.out.println("| " + item + " |"));
+            System.out.println("==================================\n");
+            operationList.forEach(System.out::println);
+            System.out.println("\n==================================\n");
+        }
     }
 }

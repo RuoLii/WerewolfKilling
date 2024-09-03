@@ -29,11 +29,17 @@ public class Role {
     }
 
     /**
+     *
+     */
+    public void say() {
+        System.out.println(id + " 号玩家发言...");
+    }
+
+    /**
      * 死亡事件
      */
-    public Role dead(List<Role> roleList) throws InterruptedException {
+    public void dead() {
         this.isAlive = false;
-        return deadKill(roleList);
     }
 
     /**
@@ -84,7 +90,7 @@ public class Role {
         String temp;
         if (isAlive) temp = "存活";
         else temp = "死亡";
-        return id + "号玩家——" + name + "——" + temp;
+        return id + "号—" + name + "—" + temp;
     }
 
     @Override
