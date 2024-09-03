@@ -11,4 +11,6 @@ public class WolfKing extends Role{
         this.name = "狼王";
         this.camp = true;
     }
+
+
 }
