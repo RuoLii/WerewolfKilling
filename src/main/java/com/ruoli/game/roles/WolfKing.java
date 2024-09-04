@@ -33,6 +33,6 @@ public class WolfKing extends Role {
         List<Role> aliveRoleList = roleList.stream().filter(item -> item.isAlive).collect(Collectors.toList());
         killedRole = aliveRoleList.get(new Random().nextInt(aliveRoleList.size()));
         System.out.println("狼王临死前杀死了" + killedRole.id + " 号玩家。");
-        return aliveRoleList.get(new Random().nextInt(aliveRoleList.size()));
+        return killedRole;
     }
 }
