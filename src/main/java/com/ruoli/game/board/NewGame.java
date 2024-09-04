@@ -6,12 +6,7 @@ import com.ruoli.game.roles.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 12人狼王守卫场
- *
- * @author RuoLi
- * @version v1.0
- */
+
 public abstract class NewGame {
     //  角色列表
     protected final List<Role> roleList = new ArrayList<>();
