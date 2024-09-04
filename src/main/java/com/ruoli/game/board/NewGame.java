@@ -1,5 +1,6 @@
 package com.ruoli.game.board;
 
+import com.ruoli.game.Utils.RandomUtils;
 import com.ruoli.game.Utils.TimerUtils;
 import com.ruoli.game.roles.*;
 
@@ -174,7 +175,7 @@ public abstract class NewGame {
             /*
              * 投票
              */
-            int temp = new Random().nextInt(100) + 1;
+            int temp = RandomUtils.getRandomNumber();
             Role votedRole = null;
             List<Role> voteList = null;
             if (temp <= 50) {
