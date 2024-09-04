@@ -1,5 +1,6 @@
 package com.ruoli.game.roles;
 
+import com.ruoli.game.Utils.RandomUtils;
 import com.ruoli.game.Utils.TimerUtils;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class Guard extends Role {
      * @return 被守护的对象
      */
     public Role protect(List<Role> roleList, Role willKilledRole) {
-        int randomNumber = new Random().nextInt(100) + 1;
+        int randomNumber = RandomUtils.getRandomNumber();
         if (randomNumber <= 15 && willKilledRole.id != lastRoleId) {
             return willKilledRole;
         } else {

@@ -67,24 +67,6 @@ public class Role {
         return 0;
     }
 
-    /**
-     * 狼人杀人事件：
-     * 传入一个游戏的角色列表
-     * 较大概率投好人，小概率狼人自刀
-     *
-     * @return 杀人事件处理后，将杀人对象返回
-     */
-    public static Role werewolfKill(List<Role> roleList) {
-        int temp = RandomUtils.getRandomNumber();
-        List<Role> selectList;
-        if (temp <= 95) {
-            selectList = roleList.stream().filter(item -> !item.camp && item.isAlive).collect(Collectors.toList());
-        } else {
-            selectList = roleList.stream().filter(item -> item.camp && item.isAlive).collect(Collectors.toList());
-        }
-        return selectList.get(new Random().nextInt(selectList.size()));
-    }
-
     @Override
     public String toString() {
         String temp;

@@ -4,6 +4,8 @@ import com.ruoli.game.Utils.TimerUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * 预言家：晚上可验人
@@ -17,9 +19,11 @@ public class Prophet extends Role{
         this.camp = false;
     }
 
-    public static void check() throws InterruptedException {
+    public static Role check(List<Role> roleList) throws InterruptedException {
         System.out.println("TA的身份是...");
         TimerUtils.timer();
+        List<Role> checkRoleList = roleList.stream().filter(item -> item.name != "预言家").collect(Collectors.toList());
+        return checkRoleList.get(new Random().nextInt(checkRoleList.size()));
     }
 
     public static void start() throws InterruptedException {

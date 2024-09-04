@@ -1,5 +1,6 @@
 package com.ruoli.game.roles;
 
+import com.ruoli.game.Utils.RandomUtils;
 import com.ruoli.game.Utils.TimerUtils;
 
 import java.util.List;
@@ -29,7 +30,6 @@ public class Witch extends Role{
 
     /**
      *
-     * @param roleList 身份列表
      * @return 空或者被解药的人
      */
     public Boolean save() {
@@ -49,7 +49,7 @@ public class Witch extends Role{
      */
     public Role kill(List<Role> roleList) {
         if (!haveKill) return null;
-        int temp = new Random().nextInt(100) + 1;
+        int temp = RandomUtils.getRandomNumber();
         if (temp <= 50) {
             haveKill = false;
             List<Role> canKillList = roleList.stream().filter(item -> item.isAlive && item.id != id).collect(Collectors.toList());

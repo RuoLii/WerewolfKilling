@@ -1,9 +1,7 @@
 package com.ruoli.game.roles;
 
 import com.ruoli.game.Utils.TimerUtils;
-import com.ruoli.game.board.TwelveWolfKingsGuardField;
 
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
