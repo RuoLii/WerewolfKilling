@@ -5,6 +5,6 @@ public class TimerUtils {
      * 延时
      */
     public static void timer() throws InterruptedException {
-        Thread.sleep(20);
+        Thread.sleep(400);
     }
 }
